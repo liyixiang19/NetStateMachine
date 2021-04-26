@@ -1,7 +1,8 @@
-package com.yixiang.tsn.motion;
+package com.yixiang.tsn.connection;
 
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import com.yixiang.tsn.common.NetworkInfo;
+import com.yixiang.tsn.motion.Controller;
 import com.yixiang.tsn.networking.Server;
 
 import java.io.IOException;
@@ -14,12 +15,10 @@ import java.util.Arrays;
 /**
  * @author liyixiang
  */
-// 实现Runnable接口，作为线程的实现类
 public class ListenerThread implements Runnable{
-    // 表示线程的名称
-    private String name ;
 
-    // 通过构造方法配置name属性
+    private String name;
+
     public ListenerThread(String name){
         this.name = name ;
     }

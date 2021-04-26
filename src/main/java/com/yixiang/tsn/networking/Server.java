@@ -6,7 +6,6 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.time.LocalTime;
 import com.yixiang.tsn.common.*;
-import com.yixiang.tsn.motion.ListenerThread;
 
 public class Server {
     public static final int MAX_NUM = 6000;
@@ -17,20 +16,15 @@ public class Server {
         //1、定义本地设备的基本信息，基本数据格式
         //todo：写成可配置文件进行读取，或者定义地址空间，根据地址直接进行读取。
         String deviceType = "0001";
-        String deviceVId = "01X39FKS091LSO23";
+        String deviceVid = "01X39FKS091LSO23";
         String status = "0001";
         //设备信息，等待
         String deviceInfo = "0002";
 
         //2、组装数据帧
-        String datagram = assembleDatagram(deviceType, deviceVId, status, deviceInfo);
+        String datagram = assembleDatagram(deviceType, deviceVid, status, deviceInfo);
 
-        //3、广播时开始监听TCP消息，来自主站的应答, 根据主站的应答，判断组网状态，返回对应的数值。
-//        Runnable listenerThread = new ListenerThread("listener线程");
-//        Thread myThread = new Thread(listenerThread);
-//        myThread.start();
-
-        //4、发送广播
+        //3、发送广播
         DatagramSocket socket = new DatagramSocket();
         InetAddress addr = InetAddress.getByName(NetworkInfo.BROADCAST_ADDRESS);
         DatagramPacket packet = new DatagramPacket(datagram.getBytes(), datagram.length(), addr, NetworkInfo.NET_SLAVE_TO_MASTER_PORT);
@@ -54,7 +48,7 @@ public class Server {
     }
 
 
-    private static String assembleDatagram(String deviceType, String deviceVId, String status, String deviceInfo)  {
+    private static String assembleDatagram(String deviceType, String deviceVid, String status, String deviceInfo)  {
         //定义传输的数据格式
         /**
          * deviceType :
@@ -66,9 +60,7 @@ public class Server {
          */
 
         LocalTime now = LocalTime.now();
-        String datagram = NetworkInfo.NET_SLAVE_TO_MASTER + deviceType + deviceInfo + status + deviceVId + "  time:" + now;
-
-        return datagram;
+        return NetworkInfo.NET_SLAVE_TO_MASTER + deviceType + deviceInfo + status + deviceVid + "  time:" + now;
     }
 
 

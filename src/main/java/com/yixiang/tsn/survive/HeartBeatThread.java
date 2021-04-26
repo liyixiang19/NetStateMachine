@@ -1,24 +1,37 @@
 package com.yixiang.tsn.survive;
 
 import com.yixiang.tsn.common.NetworkInfo;
-
-import java.io.IOException;
 import java.net.*;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalTime;
 
-public class HeartBeat {
 
-    public static void sendAliveMsg() throws Exception{
+/**
+ * @author liyixiang
+ */
+public class HeartBeatThread implements Runnable {
+
+    private String name;
+
+    public HeartBeatThread(String name) {
+        this.name = name;
+    }
+
+    // 覆写run()方法，作为线程 的操作主体
+    @Override
+    public void run() {
         System.out.println("主站地址为： === " + NetworkInfo.MASTER_ADDR);
-        while (true) {
-            System.out.println("发送心跳信息");
-            String aliveMsg = assembleData();
-            DatagramSocket socket = new DatagramSocket();
-            InetAddress addr = InetAddress.getByName(NetworkInfo.MASTER_ADDR);
-            DatagramPacket packet = new DatagramPacket(aliveMsg.getBytes(), aliveMsg.length(), addr, NetworkInfo.HEARTBEAT_SLAVE_PORT);
-            socket.send(packet);
-            Thread.sleep(20000);
+        try {
+            while (true) {
+                System.out.println("发送心跳信息");
+                String aliveMsg = assembleData();
+                DatagramSocket socket = new DatagramSocket();
+                InetAddress addr = InetAddress.getByName(NetworkInfo.MASTER_ADDR);
+                DatagramPacket packet = new DatagramPacket(aliveMsg.getBytes(), aliveMsg.length(), addr, NetworkInfo.HEARTBEAT_SLAVE_PORT);
+                socket.send(packet);
+                Thread.sleep(20000);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
