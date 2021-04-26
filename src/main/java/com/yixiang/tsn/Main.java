@@ -5,7 +5,7 @@ import com.yixiang.tsn.common.NetworkInfo;
 import com.yixiang.tsn.device.DeviceType;
 import com.yixiang.tsn.engine.StatusMachineEngine;
 import com.yixiang.tsn.init.InitEvent;
-import com.yixiang.tsn.motion.Connection;
+import com.yixiang.tsn.motion.ListenerThread;
 import com.yixiang.tsn.networking.Server;
 import com.yixiang.tsn.status.Status;
 import com.yixiang.tsn.status.event.Event;
@@ -59,6 +59,10 @@ public class Main {
         StatusMachineEngine.post(Device);
 
         //从站开始组网过程，等待主站回复，组网成功
+        //广播时开始监听TCP消息，来自主站的应答, 根据主站的应答，判断组网状态，返回对应的数值。
+        Runnable listenerThread = new ListenerThread("listener线程");
+        Thread myThread = new Thread(listenerThread);
+        myThread.start();
         if (200 == Server.slaveOrganization()) {
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>设备组网成功，预操作完成<<<<<<<<<<<<<<<<<<<<");
             Device.setEvent(Event.SUCCESS);
@@ -69,7 +73,7 @@ public class Main {
         StatusMachineEngine.post(Device);
 
         //启动心跳线程,每30s发送一次生存消息给主站
-        System.out.println(">>>>>>>>>>>>>>>>>>>>>心跳机制启动<<<<<<<<<<<<<<<<<<<<<<<<<<<\ndevice status：alive");
+        System.out.println(">>>>>>>>>>>>>>>>>>>>>心跳机制启动<<<<<<<<<<<<<<<<<<<<<<<<<<<\n device status：alive");
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
@@ -83,9 +87,14 @@ public class Main {
         new Thread(runnable).start();
 
         //等待进行运动控制，同时阻塞主线程
-        Connection.receive();
+        try {
+            System.out.println("------------------等待主站控制命令----------------");
+            myThread.join();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
-        System.out.println("--->>>>>>>>>end<<<<<<<<-------");
+        System.out.println("--->>>>>>>>>>>>end<<<<<<<<<<<-------");
     }
 
 

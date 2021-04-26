@@ -20,11 +20,11 @@ public class NetworkInfo {
     public static String DEVICE_INFO = "0000";
 
     //运动控制
-    public static int CONTROL_BROADCAST_PORT = 7991;
+    public static int CONTROL_BROADCAST_PORT = 9991;
     public final static String CONTROL_TYPE = "0625";
-    public final static String RUN_MODE_1 = "0001";
-    public final static String RUN_MODE_2 = "0002";
-    public final static String RUN_MODE_3 = "0003";
+    public final static String RUN_MODE_1 = "2301";
+    public final static String RUN_MODE_2 = "2302";
+    public final static String RUN_MODE_3 = "2303";
     // query function
     public static String QUERY_NUM = "010300040001C5CB";
     public static String QUERY_PLUS = "01030007000135CB";

@@ -52,14 +52,18 @@ public class Controller {
     }
 
 
+    /**
+     * Description: 查询电机速度
+     * @return 16进制数据的字节流
+     * @throws Exception
+     */
     private static byte[] queryVelocity() throws Exception {
         ArrayList<String> list = SerialTool.findPort();
         final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
         byte[] bytes = hexStrToBinaryStr(NetworkInfo.QUERY_VELOCITY);
         SerialTool.sendToPort(serialPort, bytes);
         SerialTool.closePort(serialPort);
-        byte[] revData = SerialTool.readFromPort(serialPort);
-        return revData;
+        return SerialTool.readFromPort(serialPort);
     }
 
     private static void queryPlus() throws Exception {
@@ -73,12 +77,11 @@ public class Controller {
     private static void setVelocity(int velocity) throws Exception {
         ArrayList<String> list = SerialTool.findPort();
         final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
-        String hexPlus = String.format("%4s", Integer.toHexString(velocity)).replace(" ", "0");
-        String str = NetworkInfo.SET_VELOCITY + hexPlus;
+        String hexData = String.format("%4s", Integer.toHexString(velocity)).replace(" ", "0");
+        String str = NetworkInfo.SET_VELOCITY + hexData;
         //CRC checksum
-        byte[] sbuf2 = CRC_16.getSendBuf(str);
-        String data = CRC16M.getBufHexStr(sbuf2);
-
+        byte[] crcBuf = CRC_16.getSendBuf(str);
+        String data = CRC16M.getBufHexStr(crcBuf);
         byte[] bytes = hexStrToBinaryStr(data);
         SerialTool.sendToPort(serialPort, bytes);
         SerialTool.closePort(serialPort);
@@ -160,6 +163,12 @@ public class Controller {
 
 
     public static void runMode1() {
+        System.out.println("run mode 1");
+        try {
+            forward();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
