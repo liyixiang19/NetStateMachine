@@ -1,6 +1,7 @@
 package com.yixiang.tsn;
 
 
+import com.yixiang.tsn.common.NetworkInfo;
 import com.yixiang.tsn.device.DeviceType;
 import com.yixiang.tsn.engine.StatusMachineEngine;
 import com.yixiang.tsn.init.InitEvent;
@@ -22,7 +23,9 @@ import com.yixiang.tsn.status.slave.preOperation.PreOperationSuccessStatusHandle
 import com.yixiang.tsn.survive.HeartBeatThread;
 
 /**
- * Created by jetty on 18/1/9.
+ *
+ * @author liyixiang
+ * @date 20/04/27
  */
 public class Main {
 
@@ -56,13 +59,12 @@ public class Main {
         StatusMachineEngine.post(device);
 
         //从站开始组网过程，等待主站回复，组网成功
-
         //开启监听线程，监听来自主站的消息，并对消息进行解析判断
         Runnable listenerThread = new ListenerThread("listener线程");
         Thread myThread = new Thread(listenerThread);
         myThread.start();
 
-        if (200 == Server.slaveOrganization()) {
+        if (NetworkInfo.NET_SUCCESS == Server.slaveOrganization()) {
             System.out.println(">>>>>>>>>>>>>>>>>>>>>>>>设备组网成功，预操作完成<<<<<<<<<<<<<<<<<<<<");
             device.setEvent(Event.SUCCESS);
         } else {
@@ -84,11 +86,8 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-
         System.out.println("--->>>>>>>>>>>>end<<<<<<<<<<<-------");
     }
-
-
 
     public static void registrySlaveStatusHandler() {
 

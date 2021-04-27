@@ -156,10 +156,12 @@ public class SerialTool {
         try {
 
             in = serialPort.getInputStream();
-            int bufflenth = in.available();        //获取buffer里的数据长度
+            //获取buffer里的数据长度
+            int bufflenth = in.available();
 
             while (bufflenth != 0) {
-                bytes = new byte[bufflenth];    //初始化byte数组为buffer中数据的长度
+                //初始化byte数组为buffer中数据的长度
+                bytes = new byte[bufflenth];
                 in.read(bytes);
                 bufflenth = in.available();
             }
@@ -189,14 +191,12 @@ public class SerialTool {
     public static void addListener(SerialPort port, SerialPortEventListener listener) throws Exception {
 
         try {
-
             //给串口添加监听器
             port.addEventListener(listener);
             //设置当有数据到达时唤醒监听接收线程
             port.notifyOnDataAvailable(true);
             //设置当通信中断时唤醒中断线程
             port.notifyOnBreakInterrupt(true);
-
         } catch (TooManyListenersException e) {
             throw new Exception();
         }

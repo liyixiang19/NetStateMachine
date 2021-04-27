@@ -51,7 +51,6 @@ public class Controller {
         SerialTool.closePort(serialPort);
     }
 
-
     /**
      * Description: 查询电机速度
      * @return 16进制数据的字节流
@@ -66,6 +65,10 @@ public class Controller {
         return SerialTool.readFromPort(serialPort);
     }
 
+    /**
+     * Description: 查询电机脉冲数
+     * @throws Exception
+     */
     private static void queryPlus() throws Exception {
         ArrayList<String> list = SerialTool.findPort();
         final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
@@ -73,7 +76,22 @@ public class Controller {
         SerialTool.sendToPort(serialPort, bytes);
         SerialTool.closePort(serialPort);
     }
+    /**
+     * Description: 查询电机计数
+     * @throws Exception
+     */
+    private static void queryNum() throws Exception {
+        ArrayList<String> list = SerialTool.findPort();
+        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
+        byte[] bytes = hexStrToBinaryStr(NetworkInfo.QUERY_NUM);
+        SerialTool.sendToPort(serialPort, bytes);
+        SerialTool.closePort(serialPort);
+    }
 
+    /**
+     * Description: 设置电机速度
+     * @throws Exception
+     */
     private static void setVelocity(int velocity) throws Exception {
         ArrayList<String> list = SerialTool.findPort();
         final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
@@ -87,34 +105,45 @@ public class Controller {
         SerialTool.closePort(serialPort);
     }
 
+    /**
+     * Description: 设置电机脉冲数
+     * @throws Exception
+     */
     private static void setPlus(int plus) throws Exception {
         ArrayList<String> list = SerialTool.findPort();
         final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
         String hexPlus = String.format("%4s", Integer.toHexString(plus)).replace(" ", "0");
         String str = NetworkInfo.SET_PLUS + hexPlus;
         //CRC checksum
-        byte[] sbuf2 = CRC_16.getSendBuf(str);
-        String data = CRC16M.getBufHexStr(sbuf2);
+        byte[] crcBuf = CRC_16.getSendBuf(str);
+        String data = CRC16M.getBufHexStr(crcBuf);
 
         byte[] bytes = hexStrToBinaryStr(data);
         SerialTool.sendToPort(serialPort, bytes);
         SerialTool.closePort(serialPort);
     }
 
+    /**
+     * Description: 设置电机计数
+     * @throws Exception
+     */
     private static void setNumber(int number) throws Exception {
         ArrayList<String> list = SerialTool.findPort();
         final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
         String hexPlus = String.format("%4s", Integer.toHexString(number)).replace(" ", "0");
         String str = NetworkInfo.SET_NUMBER + hexPlus;
         //CRC checksum
-        byte[] sbuf2 = CRC_16.getSendBuf(str);
-        String data = CRC16M.getBufHexStr(sbuf2);
+        byte[] crcBuf = CRC_16.getSendBuf(str);
+        String data = CRC16M.getBufHexStr(crcBuf);
         byte[] bytes = hexStrToBinaryStr(data);
         SerialTool.sendToPort(serialPort, bytes);
         SerialTool.closePort(serialPort);
     }
 
-    //
+    /**
+     * Description: 十六进制字符串转二进制字符串
+     * @return
+     */
     public static byte[] hexStrToBinaryStr(String hexString) {
         hexString = hexString.replaceAll(" ", "");
         int len = hexString.length();
@@ -124,21 +153,6 @@ public class Controller {
                     + Character.digit(hexString.charAt(i + 1), 16));
         }
         return data;
-    }
-
-    /**
-     * 字符串转化成为16进制字符串
-     * @param s
-     * @return
-     */
-    public static String strTo16(String s) {
-        String str = "";
-        for (int i = 0; i < s.length(); i++) {
-            int ch = (int) s.charAt(i);
-            String s4 = Integer.toHexString(ch);
-            str = str + s4;
-        }
-        return str;
     }
 
     /**
@@ -166,6 +180,9 @@ public class Controller {
         System.out.println("run mode 1");
         try {
             forward();
+            Thread.sleep(5000);
+            stop();
+            backward();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -173,11 +190,57 @@ public class Controller {
     }
 
     public static void runMode2() {
-
+        System.out.println("run mode 2");
+        try {
+            backward();
+            Thread.sleep(5000);
+            stop();
+            Thread.sleep(2000);
+            forward();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public static void runMode3() {
+        System.out.println("run mode 3");
+        int counter = 0;
+        try {
+            while (true) {
+                forward();
+                Thread.sleep(5000);
+                stop();
+                Thread.sleep(2000);
+                backward();
+                Thread.sleep(5000);
+                if (counter > 3) {
+                    break;
+                }
+                counter++;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
+    }
+
+
+    /**
+     * Description: 将串口接收到的二进制数据转化成16进制的字符串
+     * @param bytes
+     * @return
+     */
+    public static String bytesToHexStr(byte[] bytes) {
+        StringBuilder stringBuilder = new StringBuilder("");
+        for (byte aByte : bytes) {
+            int v = aByte & 0xFF;
+            String hv = Integer.toHexString(v);
+            if (hv.length() < 2) {
+                stringBuilder.append(0);
+            }
+            stringBuilder.append(hv);
+        }
+        return stringBuilder.toString().toUpperCase(Locale.ROOT).substring(6, 10);
     }
 
 
@@ -199,17 +262,7 @@ public class Controller {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    StringBuilder stringBuilder = new StringBuilder("");
-                    for (int i = 0; i < bytes.length; i++) {
-                        int v = bytes[i] & 0xFF;
-                        String hv = Integer.toHexString(v);
-                        if (hv.length() < 2) {
-                            stringBuilder.append(0);
-                        }
-                        stringBuilder.append(hv);
-                    }
-                    String res = stringBuilder.toString().toUpperCase(Locale.ROOT).substring(6, 10);
-
+                    System.out.println(bytesToHexStr(bytes));
                 }
             }
         });
@@ -218,6 +271,7 @@ public class Controller {
 
 
     }
+
     public static void setListenerToSerialPort(SerialPort serialPort, SerialPortEventListener listener) {
         try {
             //给串口添加事件监听
@@ -225,8 +279,10 @@ public class Controller {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        serialPort.notifyOnDataAvailable(true);//串口有数据监听
-        serialPort.notifyOnBreakInterrupt(true);//中断事件监听
+        //串口有数据监听
+        serialPort.notifyOnDataAvailable(true);
+        //中断事件监听
+        serialPort.notifyOnBreakInterrupt(true);
     }
 
 }

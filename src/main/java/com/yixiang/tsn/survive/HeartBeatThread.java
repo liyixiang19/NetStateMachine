@@ -16,7 +16,6 @@ public class HeartBeatThread implements Runnable {
         this.name = name;
     }
 
-    // 覆写run()方法，作为线程 的操作主体
     @Override
     public void run() {
         System.out.println("主站地址为： === " + NetworkInfo.MASTER_ADDR);
@@ -35,14 +34,14 @@ public class HeartBeatThread implements Runnable {
         }
     }
 
+    /**
+     * protocol type : heartbeat == 0312
+     * deviceType : 01--motor 02--I/O
+     * vid : (the only different id for every device, 16bytes == eg.01X39FKS091LSO23
+     * status : 01--normal 02--malfunction
+     */
     private static String assembleData() {
         //定义传输的数据格式
-        /**
-         * protocol type : heartbeat == 0312
-         * deviceType : 01--motor 02--I/O
-         * vid : (the only different id for every device, 16bytes == eg.01X39FKS091LSO23
-         * status : 01--normal 02--malfunction
-         */
         String dataGram = "";
         String controlWord = "0000";
         LocalTime now = LocalTime.now();

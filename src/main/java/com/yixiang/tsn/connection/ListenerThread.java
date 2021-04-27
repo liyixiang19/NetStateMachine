@@ -55,6 +55,10 @@ public class ListenerThread implements Runnable{
         }
     }
 
+    /**
+     * Description: 组网报文分析
+     * @param data
+     */
     private static void analysisNetDataGram(String data) {
         if ("0200".equals(data.substring(4, 8))) {
             String deviceID = data.substring(8, 12);
@@ -69,6 +73,10 @@ public class ListenerThread implements Runnable{
         }
     }
 
+    /**
+     * Description: 控制报文分析
+     * @param data
+     */
     private static void analysisControlDataGram(String data) {
         String deviceId = data.substring(8, 12);
         String deviceType = data.substring(4, 8);
@@ -88,6 +96,25 @@ public class ListenerThread implements Runnable{
                 break;
             default:
                 System.out.println("未知的运动模式");
+        }
+    }
+
+
+    /**
+     * Description: 查询报文分析
+     * @param data
+     */
+    private static void analysisQueryDataGram(String data) {
+        String queryDataType = data.substring(0, 4);
+        switch (queryDataType) {
+            case NetworkInfo.VELOCITY:
+                //TODO: 启动串口的监听模式，当有数据输出时触发事件，这里将返回的数据通过TCP返回给主站，考虑如何将数据返回主站,并且位置数据设置为实时返回，0.5s刷新一次，要设计定时循环发送
+                break;
+            case NetworkInfo.PLUS:
+                System.out.println();
+                break;
+            default:
+                System.out.println("未知的查询信息");
         }
     }
 }

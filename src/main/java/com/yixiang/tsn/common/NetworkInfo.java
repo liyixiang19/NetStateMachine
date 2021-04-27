@@ -6,6 +6,7 @@ public class NetworkInfo {
     public static int HEARTBEAT_SLAVE_PORT = 9601;
     public static String SLAVE_ADDR;
     public static String HEARTBEAT_TYPE = "0312";
+
     //组网协议相关
     public static String NET_SLAVE_TO_MASTER = "0812";
     public static String NET_MASTER_TO_SLAVE = "0827";
@@ -25,6 +26,7 @@ public class NetworkInfo {
     public final static String RUN_MODE_1 = "2301";
     public final static String RUN_MODE_2 = "2302";
     public final static String RUN_MODE_3 = "2303";
+
     // query function
     public static String QUERY_NUM = "010300040001C5CB";
     public static String QUERY_PLUS = "01030007000135CB";
@@ -35,11 +37,21 @@ public class NetworkInfo {
     public static String BACKWARD = "01060001000119CA";
     public static String STOP = "010600020001E9CA";
 
-    // set function
-    // 需要填写数据，并追加CRC16/modbus校验
-    // SET_PLUS + DATA + CRC
+    /**
+     * set function
+     * 需要填写数据，并追加CRC16/modbus
+     * 校验SET_PLUS + DATA + CRC
+     */
     public static String SET_VELOCITY = "01060005";
     public static String SET_NUMBER = "01060004";
     public static String SET_PLUS = "01060007";
+
+    //返回值
+    public static int NET_SUCCESS = 200;
+
+    //查询值类型
+    public final static String VELOCITY = "1111";
+    public final static String PLUS = "2222";
+    public final static String POSITION = "3333";
 
 }
