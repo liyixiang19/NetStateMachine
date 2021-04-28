@@ -11,12 +11,12 @@ public class NetworkInfo {
     public static String NET_SLAVE_TO_MASTER = "0812";
     public static String NET_MASTER_TO_SLAVE = "0827";
     public static int NET_SLAVE_TO_MASTER_PORT = 9000;
-    public static int NET_MASTER_TO_SLAVE_PORT = 8000;
+    public final static int NET_MASTER_TO_SLAVE_PORT = 8000;
     public static String BROADCAST_ADDRESS = "255.255.255.255";
 
     //device info
-    public static String ID = "";
-    public static String VID = "01X39FKS091LSO23";
+    public static String DEVICE_ID = "";
+    public static String VID = "01X39FKS091L111B";
     public static String DEVICE_TYPE = "0001";
     public static String DEVICE_INFO = "0000";
 
@@ -50,8 +50,15 @@ public class NetworkInfo {
     public static int NET_SUCCESS = 200;
 
     //查询值类型
-    public final static String VELOCITY = "1111";
-    public final static String PLUS = "2222";
-    public final static String POSITION = "3333";
+    public final static String QUERY_TYPE = "0714";
+    public final static String VELOCITY = "1011";
+    public final static String PLUS = "1012";
+    public final static String POSITION = "1013";
+
+    //查询值返回类型
+    public final static String QUERY_BACK_TYPE = "0715";
+
+    //设置值类型
+    public final static String SET_TYPE = "0861";
 
 }

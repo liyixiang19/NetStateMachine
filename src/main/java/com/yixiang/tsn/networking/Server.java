@@ -15,14 +15,10 @@ public class Server {
     public static int slaveOrganization() throws IOException, InterruptedException {
         //1、定义本地设备的基本信息，基本数据格式
         //todo：写成可配置文件进行读取，或者定义地址空间，根据地址直接进行读取。
-        String deviceType = "0001";
-        String deviceVid = "01X39FKS091LSO23";
         String status = "0001";
-        //设备信息，等待
-        String deviceInfo = "0002";
 
         //2、组装数据帧
-        String datagram = assembleDatagram(deviceType, deviceVid, status, deviceInfo);
+        String datagram = assembleDatagram(NetworkInfo.DEVICE_TYPE, NetworkInfo.VID, status, NetworkInfo.DEVICE_INFO);
 
         //3、发送广播
         DatagramSocket socket = new DatagramSocket();
@@ -34,7 +30,7 @@ public class Server {
             socket.send(packet);
             System.out.println("data send : " + datagram);
             //休眠 1s
-            Thread.sleep(2000);
+            Thread.sleep(5000);
             tries++;
         }
         socket.close();

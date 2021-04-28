@@ -15,40 +15,44 @@ import java.util.Arrays;
 import java.util.Locale;
 
 public class Controller {
+
+    SerialPort serialPort = null;
+
+    public Controller() {
+        try {
+            ArrayList<String> list = SerialTool.findPort();
+            serialPort = SerialTool.openPort(list.get(0), 9600);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+
     /**
      * Description: 前进功能
      * @throws Exception
      */
-    private static void forward() throws Exception {
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
+    private void forward() throws Exception {
         byte[] bytes = hexStrToBinaryStr(NetworkInfo.FORWARD);
         SerialTool.sendToPort(serialPort, bytes);
-        SerialTool.closePort(serialPort);
     }
 
     /**
      * Description: 后退功能
      * @throws Exception
      */
-    private static void backward() throws Exception {
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
+    private void backward() throws Exception {
         byte[] bytes = hexStrToBinaryStr(NetworkInfo.BACKWARD);
         SerialTool.sendToPort(serialPort, bytes);
-        SerialTool.closePort(serialPort);
     }
 
     /**
      * Description: 停止功能
      * @throws Exception
      */
-    private static void stop() throws Exception {
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
+    private void stop() throws Exception {
         byte[] bytes = hexStrToBinaryStr(NetworkInfo.STOP);
         SerialTool.sendToPort(serialPort, bytes);
-        SerialTool.closePort(serialPort);
     }
 
     /**
@@ -56,45 +60,49 @@ public class Controller {
      * @return 16进制数据的字节流
      * @throws Exception
      */
-    private static byte[] queryVelocity() throws Exception {
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
-        byte[] bytes = hexStrToBinaryStr(NetworkInfo.QUERY_VELOCITY);
-        SerialTool.sendToPort(serialPort, bytes);
-        SerialTool.closePort(serialPort);
-        return SerialTool.readFromPort(serialPort);
+    public String queryVelocity() throws Exception {
+        return query(NetworkInfo.QUERY_VELOCITY);
     }
 
     /**
      * Description: 查询电机脉冲数
      * @throws Exception
      */
-    private static void queryPlus() throws Exception {
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
-        byte[] bytes = hexStrToBinaryStr(NetworkInfo.QUERY_PLUS);
-        SerialTool.sendToPort(serialPort, bytes);
-        SerialTool.closePort(serialPort);
+    public String queryPlus() throws Exception {
+        return query(NetworkInfo.QUERY_PLUS);
     }
     /**
      * Description: 查询电机计数
      * @throws Exception
      */
-    private static void queryNum() throws Exception {
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
-        byte[] bytes = hexStrToBinaryStr(NetworkInfo.QUERY_NUM);
-        SerialTool.sendToPort(serialPort, bytes);
-        SerialTool.closePort(serialPort);
+    public String queryNum() throws Exception {
+        return query(NetworkInfo.QUERY_NUM);
     }
+
+    /**
+     * Description: 查询功能
+     * @param content
+     * @return
+     * @throws Exception
+     */
+    public String query(String content) throws Exception {
+        byte[] bytes = hexStrToBinaryStr(content);
+        SerialTool.sendToPort(serialPort, bytes);
+        Thread.sleep(50);
+        byte[] receiveBytes = SerialTool.readFromPort(serialPort);
+        if (null != receiveBytes) {
+            long dec_num = Long.parseLong(bytesToHexStr(receiveBytes), 16);
+            return String.valueOf(dec_num);
+        }
+        return "";
+    }
+
 
     /**
      * Description: 设置电机速度
      * @throws Exception
      */
-    private static void setVelocity(int velocity) throws Exception {
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
+    public void setVelocity(int velocity) throws Exception {
         String hexData = String.format("%4s", Integer.toHexString(velocity)).replace(" ", "0");
         String str = NetworkInfo.SET_VELOCITY + hexData;
         //CRC checksum
@@ -102,34 +110,27 @@ public class Controller {
         String data = CRC16M.getBufHexStr(crcBuf);
         byte[] bytes = hexStrToBinaryStr(data);
         SerialTool.sendToPort(serialPort, bytes);
-        SerialTool.closePort(serialPort);
     }
 
     /**
      * Description: 设置电机脉冲数
      * @throws Exception
      */
-    private static void setPlus(int plus) throws Exception {
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
+    public void setPlus(int plus) throws Exception {
         String hexPlus = String.format("%4s", Integer.toHexString(plus)).replace(" ", "0");
         String str = NetworkInfo.SET_PLUS + hexPlus;
         //CRC checksum
         byte[] crcBuf = CRC_16.getSendBuf(str);
         String data = CRC16M.getBufHexStr(crcBuf);
-
         byte[] bytes = hexStrToBinaryStr(data);
         SerialTool.sendToPort(serialPort, bytes);
-        SerialTool.closePort(serialPort);
     }
 
     /**
      * Description: 设置电机计数
      * @throws Exception
      */
-    private static void setNumber(int number) throws Exception {
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
+    public void setNumber(int number) throws Exception {
         String hexPlus = String.format("%4s", Integer.toHexString(number)).replace(" ", "0");
         String str = NetworkInfo.SET_NUMBER + hexPlus;
         //CRC checksum
@@ -137,7 +138,6 @@ public class Controller {
         String data = CRC16M.getBufHexStr(crcBuf);
         byte[] bytes = hexStrToBinaryStr(data);
         SerialTool.sendToPort(serialPort, bytes);
-        SerialTool.closePort(serialPort);
     }
 
     /**
@@ -176,41 +176,61 @@ public class Controller {
     }
 
 
-    public static void runMode1() {
+    public void runMode1() {
         System.out.println("run mode 1");
         try {
+            System.out.println(">>>>>>>前进模式<<<<<<<");
             forward();
-            Thread.sleep(5000);
+            Thread.sleep(10000);
+            System.out.println(">>>>>>>停止<<<<<<<");
             stop();
+            Thread.sleep(500);
+            System.out.println(">>>>>>>后退模式<<<<<<<");
             backward();
+            Thread.sleep(8000);
+            stop();
         } catch (Exception e) {
             e.printStackTrace();
         }
 
     }
 
-    public static void runMode2() {
+    public void runMode2() {
         System.out.println("run mode 2");
         try {
+            System.out.println(">>>>>>>前进模式<<<<<<<");
             backward();
             Thread.sleep(5000);
+            System.out.println(">>>>>>>停止<<<<<<<");
             stop();
             Thread.sleep(2000);
+            System.out.println(">>>>>>>前进模式<<<<<<<");
             forward();
+            Thread.sleep(10000);
+            stop();
+            Thread.sleep(500);
+            System.out.println(">>>>>>>后退模式<<<<<<<");
+            backward();
+            Thread.sleep(6000);
+            System.out.println(">>>>>>>停止<<<<<<<");
+            stop();
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
 
-    public static void runMode3() {
+    public void runMode3() {
         System.out.println("run mode 3");
         int counter = 0;
         try {
             while (true) {
+                System.out.println(">>>>>>>前进模式<<<<<<<");
                 forward();
                 Thread.sleep(5000);
+                System.out.println(">>>>>>>停止<<<<<<<");
                 stop();
                 Thread.sleep(2000);
+                System.out.println(">>>>>>>后退模式<<<<<<<");
                 backward();
                 Thread.sleep(5000);
                 if (counter > 3) {
@@ -243,46 +263,13 @@ public class Controller {
         return stringBuilder.toString().toUpperCase(Locale.ROOT).substring(6, 10);
     }
 
-
     public static void main(String[] args) throws Exception {
 
-        ArrayList<String> list = SerialTool.findPort();
-        final SerialPort serialPort = SerialTool.openPort(list.get(0), 9600);
-        byte[] bytes = hexStrToBinaryStr(NetworkInfo.QUERY_PLUS);
-        SerialTool.sendToPort(serialPort, bytes);
-
-        //设置串口的listener
-        Controller.setListenerToSerialPort(serialPort, new SerialPortEventListener() {
-            @Override
-            public void serialEvent(SerialPortEvent serialPortEvent) {
-                if (serialPortEvent.getEventType() == SerialPortEvent.DATA_AVAILABLE) { //数据通知
-                    byte[] bytes = new byte[0];
-                    try {
-                        bytes = SerialTool.readFromPort(serialPort);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
-                    System.out.println(bytesToHexStr(bytes));
-                }
-            }
-        });
-
-        //closeSerialPort(serialPort);
-
-
+        Controller controller = new Controller();
+//        controller.setVelocity(60);
+//        Thread.sleep(2000);
+        System.out.println(controller.queryVelocity());
     }
-
-    public static void setListenerToSerialPort(SerialPort serialPort, SerialPortEventListener listener) {
-        try {
-            //给串口添加事件监听
-            serialPort.addEventListener(listener);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        //串口有数据监听
-        serialPort.notifyOnDataAvailable(true);
-        //中断事件监听
-        serialPort.notifyOnBreakInterrupt(true);
-    }
+//    01060005003CD98B
 
 }

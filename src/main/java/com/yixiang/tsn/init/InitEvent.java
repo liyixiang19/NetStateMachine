@@ -16,7 +16,7 @@ public class InitEvent {
             System.out.println("checking files, please waiting ... ");
             counter++;
             Thread.sleep(500);
-        } while (counter <= 5);
+        } while (counter <= 3);
         System.out.printf("初始化设备信息  ======  设备vid： %s， 设备类型： %s, 设备状态： %s \n", NetworkInfo.VID, NetworkInfo.DEVICE_TYPE, NetworkInfo.DEVICE_INFO);
         Thread.sleep(2000);
         System.out.println("检查网卡类型...");

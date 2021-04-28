@@ -46,7 +46,7 @@ public class HeartBeatThread implements Runnable {
         String controlWord = "0000";
         LocalTime now = LocalTime.now();
         dataGram = NetworkInfo.HEARTBEAT_TYPE + NetworkInfo.DEVICE_TYPE + NetworkInfo.DEVICE_INFO + controlWord +
-                NetworkInfo.VID + NetworkInfo.ID + "  time:" + now;
+                NetworkInfo.VID + NetworkInfo.DEVICE_ID + "  time:" + now;
 
         return dataGram;
     }
