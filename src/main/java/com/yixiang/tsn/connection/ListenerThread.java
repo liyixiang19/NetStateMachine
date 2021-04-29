@@ -40,21 +40,24 @@ public class ListenerThread implements Runnable{
                 NetworkInfo.MASTER_ADDR = revPacket.getAddress().getHostAddress();
                 //来自主站的消息
                 String msg = new String(revPacket.getData(), StandardCharsets.UTF_8);
-                System.out.println("收到的数据：" + msg);
+                System.out.println("\n收到的数据：" + msg);
                 //初始化串口
                 if (NetworkInfo.NET_MASTER_TO_SLAVE.equals(msg.substring(0, 4))) {
-                    System.out.println("\n收到来自主站的组网应答...");
+                    System.out.println("收到来自主站的组网应答...");
                     analysisNetDataGram(msg);
                 } else if (NetworkInfo.CONTROL_TYPE.equals(msg.substring(0, 4))) {
-                    System.out.println("\n收到来自主站的控制命令...");
+                    System.out.println("收到来自主站的控制命令...");
                     //解析主站的控制命令，向串口发送控制命令
                     analysisControlDataGram(msg, controller);
                 } else if (NetworkInfo.QUERY_TYPE.equals(msg.substring(0, 4))) {
-                    System.out.println("\n收到来自主站的查询命令...");
+                    System.out.println("收到来自主站的查询命令...");
                     analysisQueryDataGram(msg, controller);
                 } else if (NetworkInfo.SET_TYPE.equals(msg.substring(0, 4))) {
-                    System.out.println("\n收到来自主站的设置命令...");
+                    System.out.println("收到来自主站的设置命令...");
                     analysisSetDataGram(msg, controller);
+                } else if (NetworkInfo.REAL_TIME_TYPE.equals(msg.substring(0, 4))) {
+                    System.out.println("收到来自主站的实时数据监测命令...");
+                    analysisRealtimeDataGram(msg, controller);
                 } else {
                     System.out.println("协议类型错误 ------ 非控制命令");
                 }
@@ -95,15 +98,33 @@ public class ListenerThread implements Runnable{
             switch (controlWord) {
                 case NetworkInfo.RUN_MODE_1:
                     System.out.println("运动控制 ====> 模式1");
-                    controller.runMode1();
+                    Thread t1 = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            controller.runMode1();
+                        }
+                    });
+                    t1.start();
                     break;
                 case NetworkInfo.RUN_MODE_2:
                     System.out.println("运动控制 ====> 模式2");
-                    controller.runMode2();
+                    Thread t2 = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            controller.runMode2();
+                        }
+                    });
+                    t2.start();
                     break;
                 case NetworkInfo.RUN_MODE_3:
                     System.out.println("运动控制 ====> 模式3");
-                    controller.runMode3();
+                    Thread t3 = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            controller.runMode3();
+                        }
+                    });
+                    t3.start();
                     break;
                 default:
                     System.out.println("未知的运动模式");
@@ -124,6 +145,7 @@ public class ListenerThread implements Runnable{
             try {
                 switch (queryDataType) {
                     case NetworkInfo.VELOCITY:
+                        Thread.sleep(100);
                         result = controller.queryVelocity();
                         Thread.sleep(100);
                         result = controller.queryVelocity();
@@ -131,6 +153,7 @@ public class ListenerThread implements Runnable{
                         dataDeal(result);
                         break;
                     case NetworkInfo.PLUS:
+                        Thread.sleep(100);
                         result = controller.queryPlus();
                         Thread.sleep(100);
                         result = controller.queryPlus();
@@ -138,6 +161,7 @@ public class ListenerThread implements Runnable{
                         dataDeal(result);
                         break;
                     case NetworkInfo.POSITION:
+                        Thread.sleep(100);
                         result = controller.queryNum();
                         Thread.sleep(100);
                         result = controller.queryNum();
@@ -150,8 +174,6 @@ public class ListenerThread implements Runnable{
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            //发送给主站
-
         }
     }
 
@@ -159,7 +181,7 @@ public class ListenerThread implements Runnable{
      * Description: 设置报文分析
      * @param data
      */
-    private static void analysisSetDataGram(String data, Controller controller) throws IOException {
+    private static void analysisSetDataGram(String data, Controller controller) {
         String setDataType = data.substring(12, 16);
         String deviceId = data.substring(8, 12);
         String value = data.substring(32, 36);
@@ -171,15 +193,17 @@ public class ListenerThread implements Runnable{
                 switch (setDataType) {
                     case NetworkInfo.VELOCITY:
                         System.out.println("指令： 设置速度,  数值： " + val);
+                        Thread.sleep(100);
                         controller.setVelocity(val);
                         break;
                     case NetworkInfo.PLUS:
                         System.out.println("指令： 设置脉冲,  数值： " + val);
-                        Thread.sleep(500);
+                        Thread.sleep(100);
                         controller.setPlus(val);
                         break;
                     case NetworkInfo.POSITION:
                         System.out.println("指令： 设置位置,  数值： " + val);
+                        Thread.sleep(100);
                         controller.setNumber(val);
                         break;
                     default:
@@ -189,6 +213,54 @@ public class ListenerThread implements Runnable{
                 e.printStackTrace();
             }
         }
+    }
+
+    private void analysisRealtimeDataGram(String data, Controller controller) {
+        Thread realtimeSendThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String queryDataType = data.substring(12, 16);
+                String deviceId = data.substring(8, 12);
+                try {
+                    String result = "";
+                    int counter = 0;
+                    DatagramSocket socket = new DatagramSocket();
+                    InetAddress addr = InetAddress.getByName(NetworkInfo.BROADCAST_ADDRESS);
+                    if (NetworkInfo.DEVICE_ID.equals(deviceId)) {
+                        if (NetworkInfo.POSITION.equals(queryDataType)) {
+                            System.out.println("-----------收到本机的实时监测指令---------");
+                            while (NetworkInfo.REAL_TIME_FLAG) {
+                                try {
+                                    Thread.sleep(100);
+                                    result = controller.queryNum();
+                                    Thread.sleep(100);
+                                    result = controller.queryNum();
+                                    System.out.println("查询结果： ======== " + result);
+                                    //发送实时结果
+                                    String data_4 = String.format("%4s", result).replace(" ", "0");
+                                    String datagram = NetworkInfo.QUERY_BACK_TYPE + NetworkInfo.DEVICE_TYPE + NetworkInfo.DEVICE_ID +
+                                            NetworkInfo.REALTIME_DATA_BACK_FLAG + NetworkInfo.VID + data_4;
+                                    DatagramPacket packet = new DatagramPacket(datagram.getBytes(), datagram.length(),
+                                            addr, NetworkInfo.NET_SLAVE_TO_MASTER_PORT);
+                                    socket.send(packet);
+                                    Thread.sleep(1000);
+                                    if (counter > 120) {
+                                        NetworkInfo.REAL_TIME_FLAG = false;
+                                    }
+                                    counter++;
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                            }
+
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+        realtimeSendThread.start();
     }
 
     private static void dataDeal(String data) throws Exception {

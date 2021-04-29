@@ -55,6 +55,12 @@ public class NetworkInfo {
     public final static String PLUS = "1012";
     public final static String POSITION = "1013";
 
+    //查询实时数据
+    public final static String REAL_TIME_TYPE = "0716";
+    public static boolean REAL_TIME_FLAG = true;
+    public final static String REALTIME_DATA_BACK_FLAG = "9988";
+
+
     //查询值返回类型
     public final static String QUERY_BACK_TYPE = "0715";
 

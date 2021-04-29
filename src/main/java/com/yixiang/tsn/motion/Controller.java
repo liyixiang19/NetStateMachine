@@ -9,6 +9,7 @@ import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
 
 import java.io.IOException;
+import java.net.DatagramPacket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -178,17 +179,26 @@ public class Controller {
 
     public void runMode1() {
         System.out.println("run mode 1");
+        int count = 0;
         try {
-            System.out.println(">>>>>>>前进模式<<<<<<<");
-            forward();
-            Thread.sleep(10000);
-            System.out.println(">>>>>>>停止<<<<<<<");
-            stop();
-            Thread.sleep(500);
-            System.out.println(">>>>>>>后退模式<<<<<<<");
-            backward();
-            Thread.sleep(8000);
-            stop();
+            while (true) {
+                System.out.println(">>>>>>>前进模式<<<<<<<");
+                Thread.sleep(100);
+                forward();
+                Thread.sleep(1000);
+                System.out.println(">>>>>>>停止<<<<<<<");
+                stop();
+                Thread.sleep(500);
+                System.out.println(">>>>>>>后退模式<<<<<<<");
+                backward();
+                Thread.sleep(1000);
+                stop();
+                if (count > 5) {
+                    break;
+                }
+                count++;
+
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -198,6 +208,7 @@ public class Controller {
     public void runMode2() {
         System.out.println("run mode 2");
         try {
+            Thread.sleep(100);
             System.out.println(">>>>>>>前进模式<<<<<<<");
             backward();
             Thread.sleep(5000);
@@ -224,6 +235,7 @@ public class Controller {
         int counter = 0;
         try {
             while (true) {
+                Thread.sleep(100);
                 System.out.println(">>>>>>>前进模式<<<<<<<");
                 forward();
                 Thread.sleep(5000);
@@ -266,10 +278,26 @@ public class Controller {
     public static void main(String[] args) throws Exception {
 
         Controller controller = new Controller();
-//        controller.setVelocity(60);
-//        Thread.sleep(2000);
-        System.out.println(controller.queryVelocity());
+        int counter = 0;
+        String result = "";
+        controller.forward();
+        Thread.sleep(100);
+        while (NetworkInfo.REAL_TIME_FLAG) {
+            try {
+                System.out.println("1");
+                result = controller.queryNum();
+                Thread.sleep(100);
+                result = controller.queryNum();
+                System.out.println("查询结果： ======== " + result);
+                Thread.sleep(1000);
+                if (counter > 120) {
+                    NetworkInfo.REAL_TIME_FLAG = false;
+                }
+                counter++;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
-//    01060005003CD98B
 
 }
