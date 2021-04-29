@@ -1,16 +1,10 @@
 package com.yixiang.tsn.connection;
 
-import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import com.yixiang.tsn.common.NetworkInfo;
 import com.yixiang.tsn.motion.Controller;
-import com.yixiang.tsn.motion.SerialTool;
 import com.yixiang.tsn.networking.Server;
-import org.checkerframework.checker.units.qual.C;
-
-import java.io.IOException;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 
 /**
  * @author liyixiang
@@ -23,7 +17,6 @@ public class ListenerThread implements Runnable{
         this.name = name ;
     }
 
-    // 覆写run()方法，作为线程 的操作主体
     @Override
     public void run(){
         System.out.println("开始监听主站应答消息...");
@@ -215,6 +208,11 @@ public class ListenerThread implements Runnable{
         }
     }
 
+    /**
+     * Description: 实时数据查询报文分析
+     * @param data
+     * @param controller
+     */
     private void analysisRealtimeDataGram(String data, Controller controller) {
         Thread realtimeSendThread = new Thread(new Runnable() {
             @Override
@@ -263,6 +261,11 @@ public class ListenerThread implements Runnable{
         realtimeSendThread.start();
     }
 
+    /**
+     * Description: 返回查询结果
+     * @param data
+     * @throws Exception
+     */
     private static void dataDeal(String data) throws Exception {
         String data_4 = String.format("%4s", data).replace(" ", "0");
         String datagram = NetworkInfo.QUERY_BACK_TYPE + NetworkInfo.DEVICE_TYPE + NetworkInfo.DEVICE_ID + "0000" + NetworkInfo.VID + data_4;
