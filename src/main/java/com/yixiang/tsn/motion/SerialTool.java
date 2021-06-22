@@ -9,8 +9,6 @@ import java.util.TooManyListenersException;
 
 import gnu.io.CommPort;
 import gnu.io.CommPortIdentifier;
-import gnu.io.NoSuchPortException;
-import gnu.io.PortInUseException;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEventListener;
 import gnu.io.UnsupportedCommOperationException;

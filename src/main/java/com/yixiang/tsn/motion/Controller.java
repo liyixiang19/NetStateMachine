@@ -8,6 +8,7 @@ import com.yixiang.tsn.util.Util;
 import gnu.io.SerialPort;
 import gnu.io.SerialPortEvent;
 import gnu.io.SerialPortEventListener;
+import org.checkerframework.checker.units.qual.C;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -221,31 +222,8 @@ public class Controller {
 
     }
 
-
-
     public static void main(String[] args) throws Exception {
-
         Controller controller = new Controller();
-        int counter = 0;
-        String result = "";
         controller.forward();
-        Thread.sleep(100);
-        while (NetworkInfo.REAL_TIME_FLAG) {
-            try {
-                System.out.println("1");
-                result = controller.queryNum();
-                Thread.sleep(100);
-                result = controller.queryNum();
-                System.out.println("查询结果： ======== " + result);
-                Thread.sleep(1000);
-                if (counter > 120) {
-                    NetworkInfo.REAL_TIME_FLAG = false;
-                }
-                counter++;
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
     }
-
 }

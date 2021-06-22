@@ -16,7 +16,7 @@ public class NetworkInfo {
 
     //device info
     public static String DEVICE_ID = "";
-    public static String VID = "01X39FKS091L111B";
+    public static String VID = "01X39FKS091L111C";
     public static String DEVICE_TYPE = "0001";
     public static String DEVICE_INFO = "0000";
 
